@@ -1,0 +1,3 @@
+# Forcing Unix EOL on all cases, better consistency and almost all Windows editors can also deal with the *standard* new lines.
+# Notepad doesn't, but if you are using Notepad you have bigger problems :)
+* text eol=lf
