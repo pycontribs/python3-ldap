@@ -122,7 +122,7 @@ class BaseStrategy(object):
         exc = None
         try:
             if not self.connection.server._address_info:
-                self.connection.server._address_info = socket.getaddrinfo(self.connection.server.host, self.connection.server.port)
+                self.connection.server._address_info = socket.getaddrinfo(self.connection.server.host, self.connection.server.port, 0, socket.SOCK_STREAM)
 
             self.connection.socket = socket.socket(*self.connection.server._address_info[0][:3])
         except Exception as e:
