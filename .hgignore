@@ -1,3 +1,4 @@
+.tox/.*
 ^python3-ldap/docs/sphinx/build/.*
 ^build/.*
 ^dist/.*
