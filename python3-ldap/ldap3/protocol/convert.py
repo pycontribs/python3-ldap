@@ -1,26 +1,28 @@
 """
-Created on 2013.07.24
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.07.24
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
 from datetime import datetime, timedelta, tzinfo
 from uuid import UUID
 from ..core.exceptions import LDAPControlsError, LDAPAttributeError, LDAPObjectClassError
@@ -111,7 +113,7 @@ def substring_to_dict(substring):
 
 
 def prepare_changes_for_request(changes):
-    prepared = {}
+    prepared = dict()
     for change in changes:
         prepared[change['attribute']['type']] = (change['operation'], change['attribute']['value'])
     return prepared
@@ -187,7 +189,7 @@ def format_unicode(raw_value):
             return str(raw_value, 'utf-8', errors='strict')
         else:
             return unicode(raw_value, 'utf-8', errors='strict')
-    except TypeError:
+    except (TypeError, UnicodeDecodeError):
         pass
 
     return raw_value
@@ -235,6 +237,9 @@ def format_boolean(raw_value):
 
 def format_time(raw_value):
     """
+    """
+
+    '''
     From RFC4517:
     A value of the Generalized Time syntax is a character string
     representing a date and time.  The LDAP-specific encoding of a value
@@ -255,16 +260,15 @@ def format_time(raw_value):
             / ( %x33 %x30-31 )    ; "30" to "31"
     hour    = ( %x30-31 %x30-39 ) / ( %x32 %x30-33 ) ; "00" to "23"
     minute  = %x30-35 %x30-39                        ; "00" to "59"
-
     second      = ( %x30-35 %x30-39 ) ; "00" to "59"
     leap-second = ( %x36 %x30 )       ; "60"
-
     fraction        = ( DOT / COMMA ) 1*(%x30-39)
     g-time-zone     = %x5A  ; "Z"
                     / g-differential
     g-differential  = ( MINUS / PLUS ) hour [ minute ]
         MINUS           = %x2D  ; minus sign ("-")
-    """
+    '''
+
     if len(raw_value) < 10 or not all((c in b'0123456789+-,.Z' for c in raw_value)) or (b'Z' in raw_value and not raw_value.endswith(b'Z')):  # first ten characters are mandatory and must be numeric or timezone or fraction
         return raw_value
 
@@ -292,7 +296,7 @@ def format_time(raw_value):
         return raw_value
 
     time, _, offset = remain.partition(sep)
-    if len(time) == 2:  # mmZ fomat
+    if len(time) == 2:  # mmZ format
         pos_second = None
     elif len(remain) == 0:  # Z format
         pos_minute = None
@@ -319,7 +323,7 @@ def format_time(raw_value):
         if str != bytes:  # python3
             timezone = OffsetTzInfo((timezone_hour * 60 + timezone_minute) * (1 if sep == b'+' else -1), 'UTC' + str(sep + offset, encoding='utf-8'))
         else:
-            timezone = OffsetTzInfo((timezone_hour * 60 + timezone_minute) * (1 if sep == b'+' else -1), u'UTC' + unicode(sep + offset, encoding='utf-8'))
+            timezone = OffsetTzInfo((timezone_hour * 60 + timezone_minute) * (1 if sep == b'+' else -1), unicode('UTC' + sep + offset, encoding='utf-8'))
 
     try:
         return datetime(year=int(raw_value[pos_year: pos_year + 4]),
@@ -336,16 +340,18 @@ def format_time(raw_value):
 def format_attribute_values(schema, name, values, custom_formatter):
     """
     Tries to format following the OIDs info and format_helper specification.
-    Search for attribute oid, then attribute name (can be multiple), then attrubte syntax
-    Precedence is: 1. attribute name
-                   2. attribute oid(from schema)
-                   3. attribute names (from oid_info)
-                   4. attribute syntax (from schema)
+    Search for attribute oid, then attribute name (can be multiple), then attribute syntax
+    Precedence is:
+    1. attribute name
+    2. attribute oid(from schema)
+    3. attribute names (from oid_info)
+    4. attribute syntax (from schema)
     Custom formatters can be defined in Server object and have precedence over the standard_formatters
     If no formatter is found the raw_value is returned as bytes.
     Attributes defined as SINGLE_VALUE in schema are returned as a single object, otherwise are returned as a list of object
     Formatter functions can return any kind of object
     """
+
     formatter = None
     if schema and schema.attribute_types is not None and name.lower() in schema.attribute_types:
         attr_type = schema.attribute_types[name.lower()]

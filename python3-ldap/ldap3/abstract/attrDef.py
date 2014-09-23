@@ -1,40 +1,49 @@
 """
-Created on 2014.01.11
-
-@author: Giovanni Cannata
-
-Copyright 2014 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2014.01.11
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2014 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
 from ..core.exceptions import LDAPKeyError
 
 
 class AttrDef(object):
-    """
-    Attribute definition for abstract layer:
-    'name' is the real attribute name
-    'key' is the friendly name to use in query and while accessing the attribute, if not set is the same of name
-    'default' is the value returned if the attribute is not present
-    'validate' is an optional callable, called to check if the value in the query is valid, the callable is called with the value parameter
-    'preQuery' is an optional callable, called to transform values to be searched
-    'postQuery' is an optional callable, called to transform values returned by search
-    'dereference_dn' is a reference to an ObjectDef instance. When the attribute value contains a dn it will be searched and substituted in the entry
-    AttrDef('name') creates an AttrDef object for attribute 'name' with all default values
+    """Hold the definition of an attribute
+
+    :param name: the real attribute name
+    :type name: string
+    :param key: the friendly name to use in queries and when accessing the attribute, default to the real attribute name
+    :type key: string
+    :param validate: called to check if the value in the query is valid, the callable is called with the value parameter
+    :type validate: callable
+    :param pre_query: called to transform values returned by search
+    :type pre_query: callable
+    :param post_query: called to transform values returned by search
+    :type post_query: callable
+    :param default: value returned when the attribute is absent
+    :type default: string, integer
+    :param dereference_dn: reference to an ObjectDef instance. When the attribute value contains a dn it will be searched and substituted in the entry
+    :type dereference_dn: ObjectDef
+
     """
 
     def __init__(self, name, key=None, validate=None, pre_query=None, post_query=None, default=None, dereference_dn=None):

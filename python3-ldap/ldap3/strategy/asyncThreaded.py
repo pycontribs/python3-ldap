@@ -1,35 +1,37 @@
 """
-Created on 2013.07.15
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.07.15
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 from threading import Thread, Lock
 
 from pyasn1.codec.ber import decoder
 
 from .. import RESPONSE_COMPLETE, SOCKET_SIZE, RESULT_REFERRAL
-from ..core.exceptions import LDAPSSLConfigurationError, LDAPStartTLSError
+from ..core.exceptions import LDAPSSLConfigurationError, LDAPStartTLSError, LDAPOperationResult
 from ..strategy.baseStrategy import BaseStrategy
 from ..protocol.rfc4511 import LDAPMessage
+import socket
 
 
 # noinspection PyProtectedMember
@@ -67,8 +69,11 @@ class AsyncThreadedStrategy(BaseStrategy):
                 if get_more_data:
                     try:
                         data = self.connection.socket.recv(SOCKET_SIZE)
-                    except OSError:
+                    except (OSError, socket.error):
                         listen = False
+                    except Exception as e:
+                        print('EXC', e)
+                        print(type(e))
                     if len(data) > 0:
                         unprocessed += data
                         data = b''
@@ -119,7 +124,7 @@ class AsyncThreadedStrategy(BaseStrategy):
         self.sync = False
         self.no_real_dsa = False
         self.pooled = False
-        self.has_stream_capapbility = False
+        self.has_stream_capability = False
         self._responses = None
         self.receiver = None
         self.lock = Lock()
@@ -132,7 +137,11 @@ class AsyncThreadedStrategy(BaseStrategy):
             BaseStrategy.open(self, reset_usage=True)
             self._responses = dict()
 
-        self.connection.refresh_dsa_info()
+        try:
+            self.connection.refresh_dsa_info()
+        except LDAPOperationResult:  # catch errors from server if raise_exception = True
+            self.connection.server._dsa_info = None
+            self.connection.server._schema_info = None
 
     def close(self):
         """

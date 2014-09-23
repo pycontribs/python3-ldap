@@ -1,29 +1,33 @@
 """
-Created on 2014.04.28
-
-@author: Giovanni Cannata
-
-Copyright 2014 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2014.04.28
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2014 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 from os import linesep
 from .. import SEARCH_SCOPE_WHOLE_SUBTREE, SEARCH_DEREFERENCE_ALWAYS
+from .novell.partition_entry_count import PartitionEntryCount
+from .novell.replicaInfo import ReplicaInfo
+from .novell.listReplicas import ListReplicas
 from .novell.getBindDn import GetBindDn
 from .novell.nmasGetUniversalPassword import NmasGetUniversalPassword
 from .novell.nmasSetUniversalPassword import NmasSetUniversalPassword
@@ -83,6 +87,15 @@ class NovellExtendedOperations(ExtendedOperationContainer):
 
     def set_universal_password(self, user, new_password=None):
         return NmasSetUniversalPassword(self._connection, user, new_password).send()
+
+    def list_replicas(self, server_dn):
+        return ListReplicas(self._connection, server_dn).send()
+
+    def partition_entry_count(self, partition_dn):
+        return PartitionEntryCount(self._connection, partition_dn).send()
+
+    def replica_info(self, server_dn, partition_dn):
+        return ReplicaInfo(self._connection, server_dn, partition_dn).send()
 
 
 class MicrosoftExtendedOperations(ExtendedOperationContainer):

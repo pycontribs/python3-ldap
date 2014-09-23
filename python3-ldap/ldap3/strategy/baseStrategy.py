@@ -1,26 +1,27 @@
 """
-Created on 15/lug/2013
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.07.15
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 import socket
 from time import sleep
@@ -61,7 +62,7 @@ class BaseStrategy(object):
         self.sync = None  # indicates a synchronous connection
         self.no_real_dsa = None  # indicates a connection to a fake LDAP server
         self.pooled = None  # Indicates a connection with a connection pool
-        self.can_stream = False  # indicate if a strategy keep a stream of responses (i.e. LDIFProducer can accumulate responses with a single header). Stream must be initilized and closed in _start_listen() and _stop_listen()
+        self.can_stream = False  # indicate if a strategy keep a stream of responses (i.e. LDIFProducer can accumulate responses with a single header). Stream must be initialized and closed in _start_listen() and _stop_listen()
 
     def open(self, reset_usage=True):
         """
@@ -121,10 +122,7 @@ class BaseStrategy(object):
         """
         exc = None
         try:
-            if not self.connection.server._address_info:
-                self.connection.server._address_info = socket.getaddrinfo(self.connection.server.host, self.connection.server.port, 0, socket.SOCK_STREAM)
-
-            self.connection.socket = socket.socket(*self.connection.server._address_info[0][:3])
+            self.connection.socket = socket.socket(*self.connection.server.address_info[0][:3])
         except Exception as e:
             self.connection.last_error = 'socket creation error: ' + str(e)
             exc = e
@@ -133,7 +131,7 @@ class BaseStrategy(object):
             raise communication_exception_factory(LDAPSocketOpenError, exc)(self.connection.last_error)
 
         try:
-            self.connection.socket.connect(self.connection.server._address_info[0][4])
+            self.connection.socket.connect(self.connection.server.address_info[0][4])
         except socket.error as e:
             self.connection.last_error = 'socket connection error: ' + str(e)
             exc = e
@@ -287,7 +285,6 @@ class BaseStrategy(object):
 
         return ret_value
 
-    # @classmethod
     def decode_response(self, ldap_message):
         """
         Convert received LDAPMessage to a dict
@@ -392,50 +389,50 @@ class BaseStrategy(object):
         """
         Decode referral URI as specified in RFC 4516 relaxing specifications
         permitting 'ldaps' as scheme meaning ssl-ldap
-
-        ldapurl     = scheme COLON SLASH SLASH [host [COLON port]]
-                       [SLASH dn [QUESTION [attributes]
-                       [QUESTION [scope] [QUESTION [filter]
-                       [QUESTION extensions]]]]]
-                                      ; <host> and <port> are defined
-                                      ;   in Sections 3.2.2 and 3.2.3
-                                      ;   of [RFC3986].
-                                      ; <filter> is from Section 3 of
-                                      ;   [RFC4515], subject to the
-                                      ;   provisions of the
-                                      ;   "Percent-Encoding" section
-                                      ;   below.
-
-        scheme      = "ldap" / "ldaps"  <== not RFC4516 compliant (original is 'scheme      = "ldap"')
-        dn          = distinguishedName ; From Section 3 of [RFC4514],
-                                      ; subject to the provisions of
-                                      ; the "Percent-Encoding"
-                                      ; section below.
-
-        attributes  = attrdesc *(COMMA attrdesc)
-        attrdesc    = selector *(COMMA selector)
-        selector    = attributeSelector ; From Section 4.5.1 of
-                                      ; [RFC4511], subject to the
-                                      ; provisions of the
-                                      ; "Percent-Encoding" section
-                                      ; below.
-
-        scope       = "base" / "one" / "sub"
-        extensions  = extension *(COMMA extension)
-        extension   = [EXCLAMATION] extype [EQUALS exvalue]
-        extype      = oid               ; From section 1.4 of [RFC4512].
-
-        exvalue     = LDAPString        ; From section 4.1.2 of
-                                      ; [RFC4511], subject to the
-                                      ; provisions of the
-                                      ; "Percent-Encoding" section
-                                      ; below.
-
-        EXCLAMATION = %x21              ; exclamation mark ("!")
-        SLASH       = %x2F              ; forward slash ("/")
-        COLON       = %x3A              ; colon (":")
-        QUESTION    = %x3F              ; question mark ("?")
         """
+
+        # ldapurl     = scheme COLON SLASH SLASH [host [COLON port]]
+        #                [SLASH dn [QUESTION [attributes]
+        #                [QUESTION [scope] [QUESTION [filter]
+        #                [QUESTION extensions]]]]]
+        #                               ; <host> and <port> are defined
+        #                               ;   in Sections 3.2.2 and 3.2.3
+        #                               ;   of [RFC3986].
+        #                               ; <filter> is from Section 3 of
+        #                               ;   [RFC4515], subject to the
+        #                               ;   provisions of the
+        #                               ;   "Percent-Encoding" section
+        #                               ;   below.
+        #
+        # scheme      = "ldap" / "ldaps"  <== not RFC4516 compliant (original is 'scheme      = "ldap"')
+        # dn          = distinguishedName ; From Section 3 of [RFC4514],
+        #                               ; subject to the provisions of
+        #                               ; the "Percent-Encoding"
+        #                               ; section below.
+        #
+        # attributes  = attrdesc *(COMMA attrdesc)
+        # attrdesc    = selector *(COMMA selector)
+        # selector    = attributeSelector ; From Section 4.5.1 of
+        #                               ; [RFC4511], subject to the
+        #                               ; provisions of the
+        #                               ; "Percent-Encoding" section
+        #                               ; below.
+        #
+        # scope       = "base" / "one" / "sub"
+        # extensions  = extension *(COMMA extension)
+        # extension   = [EXCLAMATION] extype [EQUALS exvalue]
+        # extype      = oid               ; From section 1.4 of [RFC4512].
+        #
+        # exvalue     = LDAPString        ; From section 4.1.2 of
+        #                               ; [RFC4511], subject to the
+        #                               ; provisions of the
+        #                               ; "Percent-Encoding" section
+        #                               ; below.
+        #
+        # EXCLAMATION = %x21              ; exclamation mark ("!")
+        # SLASH       = %x2F              ; forward slash ("/")
+        # COLON       = %x3A              ; colon (":")
+        # QUESTION    = %x3F              ; question mark ("?")
 
         referral = dict()
         parts = uri.split('?')

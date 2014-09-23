@@ -1,26 +1,24 @@
-"""
-Created on 2014.06.30
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
-"""
+# Created on 2014.06.30
+#
+# @author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
 from ldap3 import Server, Connection, STRATEGY_REUSABLE_THREADED, GET_DSA_INFO
@@ -59,3 +57,15 @@ class Test(unittest.TestCase):
             responses.append(response)
         self.assertEqual(len(responses), 22)
         self.assertEqual(self.connection.response, None)
+
+    def test_novell_list_replicas(self):
+        result = self.connection.extend.novell.list_replicas('cn=edir1,o=services')
+        self.assertEquals(result, None)
+
+    def test_novell_replica_info(self):
+        result = self.connection.extend.novell.replica_info('cn=edir1,o=services', '')
+        self.assertEquals(result, '')
+
+    def test_novell_partition_entry_count(self):
+        result = self.connection.extend.novell.partition_entry_count('o=test')
+        self.assertTrue(result > 200)

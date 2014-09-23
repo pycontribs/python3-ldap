@@ -1,33 +1,33 @@
 """
-Created on 2013.07.15
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.07.15
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 import socket
 from pyasn1.codec.ber import decoder
 
 from .. import SESSION_TERMINATED_BY_SERVER, RESPONSE_COMPLETE, SOCKET_SIZE, RESULT_REFERRAL
-from ..core.exceptions import LDAPSocketReceiveError, communication_exception_factory, LDAPExceptionError
-from ldap3.core.exceptions import LDAPExtensionError
+from ..core.exceptions import LDAPSocketReceiveError, communication_exception_factory, LDAPExceptionError, LDAPExtensionError, LDAPOperationResult
 from ..strategy.baseStrategy import BaseStrategy
 from ..protocol.rfc4511 import LDAPMessage
 
@@ -50,7 +50,11 @@ class SyncWaitStrategy(BaseStrategy):
 
     def open(self, reset_usage=True):
         BaseStrategy.open(self, reset_usage)
-        self.connection.refresh_dsa_info()
+        try:
+            self.connection.refresh_dsa_info()
+        except LDAPOperationResult:  # catch errors from server if raise_exception = True
+            self.connection.server._dsa_info = None
+            self.connection.server._schema_info = None
 
     def _start_listen(self):
         if not self.connection.listening and not self.connection.closed:

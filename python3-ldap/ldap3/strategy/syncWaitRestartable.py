@@ -1,26 +1,28 @@
 """
-Created on 2014.03.04
-
-@author: Giovanni Cannata
-
-Copyright 2014 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2014.03.04
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
 from sys import exc_info
 from time import sleep
 import socket
@@ -124,7 +126,7 @@ class SyncWaitRestartableStrategy(SyncWaitStrategy):
                 if not self.connection.closed:
                     try:  # resetting connection
                         self.connection.close()
-                    except (socket.error, LDAPSocketOpenError):  # don't trace socket errrors because socket could already be closed
+                    except (socket.error, LDAPSocketOpenError):  # don't trace socket errors because socket could already be closed
                         pass
                     except Exception:
                         self._add_exception_to_history()

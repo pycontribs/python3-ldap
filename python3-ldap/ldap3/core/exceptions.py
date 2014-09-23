@@ -1,26 +1,27 @@
 """
-Created on 2014.05.14
-
-@author: Giovanni Cannata
-
-Copyright 2014 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2014.05.14
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2014 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 from .. import RESULT_OPERATIONS_ERROR, RESULT_PROTOCOL_ERROR, RESULT_TIME_LIMIT_EXCEEDED, RESULT_SIZE_LIMIT_EXCEEDED, \
     RESULT_STRONGER_AUTH_REQUIRED, RESULT_REFERRAL, RESULT_ADMIN_LIMIT_EXCEEDED, RESULT_UNAVAILABLE_CRITICAL_EXTENSION, \
@@ -77,7 +78,7 @@ class LDAPOperationResult(LDAPException):
              self.type if self.type else None,
              self.response if self.response else None]
 
-        return ' - '.join(filter(None, s))
+        return ' - '.join([str(item) for item in s if s is not None])
 
     def __repr__(self):
         return self.__str__()

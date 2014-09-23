@@ -1,31 +1,33 @@
 """
-Created on 2013.05.31
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.05.31
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
 from pyasn1.type.univ import OctetString
-from ..core.exceptions import LDAPExtensionError
 from ..protocol.rfc4511 import ExtendedRequest, RequestName, ResultCode, RequestValue
 from ..protocol.convert import decode_referrals
 from pyasn1.codec.ber import encoder
+from pyasn1.type.base import Asn1Item
 
 
 # ExtendedRequest ::= [APPLICATION 23] SEQUENCE {
@@ -37,12 +39,14 @@ def extended_operation(request_name,
                        request_value=None):
     request = ExtendedRequest()
     request['requestName'] = RequestName(request_name)
-    if request_value and not isinstance(request_value, (str, bytes, bytearray)):
+    if request_value and isinstance(request_value, Asn1Item):
         request['requestValue'] = RequestValue(encoder.encode(request_value))
-    elif request_value and isinstance(request_value, (str, bytes, bytearray)):
-        request['requestValue'] = RequestValue(encoder.encode(OctetString(request_value)))
-    elif request_value is not None:
-        raise LDAPExtensionError('unable to encode value for extended operation')
+    elif str != bytes and isinstance(request_value, (bytes, bytearray)):  # in python3 doesn't try to encode a byte value
+        request['requestValue'] = request_value
+    elif request_value:  # tries to encode as a octet string
+        request['requestValue'] = RequestValue(encoder.encode(OctetString(str(request_value))))
+    #elif request_value is not None:
+    #    raise LDAPExtensionError('unable to encode value for extended operation')
     return request
 
 

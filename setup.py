@@ -1,31 +1,42 @@
-"""
-Created on 2013.07.11
+# Created on 2013.07.11
+#
+# @author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
-@author: Giovanni Cannata
+from setuptools import setup, Command
 
-Copyright 2013 Giovanni Cannata
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
 
-This file is part of python3-ldap.
+    def finalize_options(self):
+        pass
 
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
-"""
-
-from setuptools import setup
+    def run(self):
+        import sys,subprocess
+        errno = subprocess.call([sys.executable, 'python -m pytest'])
+        raise SystemExit(errno)
 
 setup(name='python3-ldap',
-      version='0.9.5.1',
+      version='0.9.5.3',
       packages=['ldap3',
                 'ldap3.core',
                 'ldap3.abstract',
@@ -42,6 +53,8 @@ setup(name='python3-ldap',
       ],
       package_dir={'': 'python3-ldap'},
       install_requires=['pyasn1 == 0.1.7'],
+      tests_require=['setuptools', 'tox', 'pep8', 'autopep8', 'sphinx', 'six>=1.5.2', 'pytest'],
+      cmdclass = {'test': PyTest},
       license='LGPL v3',
       author='Giovanni Cannata',
       author_email='python3ldap@gmail.com',

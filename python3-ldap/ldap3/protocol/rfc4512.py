@@ -1,31 +1,33 @@
 """
-Created on 2013.09.11
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.09.11
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
 from os import linesep
 import re
 
-from .. import CLASS_ABSTRACT, CLASS_STRUCTURAL, CLASS_AUXILIARY, ATTRIBUTE_USER_APPLICATION, ATTRIBUTE_DIRECTORY_OPERATION, ATTRIBUTE_DISTRIBUTED_OPERATION, ATTRIBUTE_DSA_OPERATION
+from .. import CLASS_ABSTRACT, CLASS_STRUCTURAL, CLASS_AUXILIARY, ATTRIBUTE_USER_APPLICATION, ATTRIBUTE_DIRECTORY_OPERATION, ATTRIBUTE_DISTRIBUTED_OPERATION, ATTRIBUTE_DSA_OPERATION, CASE_INSENSITIVE_SCHEMA_NAMES
+from ..utils.caseInsensitiveDictionary import CaseInsensitiveDict
 from .oid import Oids, decode_oids, decode_syntax
 from ..core.exceptions import LDAPSchemaError
 
@@ -124,7 +126,7 @@ class DsaInfo(object):
 
     def __repr__(self):
         r = 'DSA info (from DSE):' + linesep
-        r += ('  Supported LDAP Versions: ' + ', '.join([s for s in self.supported_ldap_versions]) + linesep) if self.supported_ldap_versions else ''
+        r += ('  Supported LDAP Versions: ' + ', '.join([str(s) for s in self.supported_ldap_versions]) + linesep) if self.supported_ldap_versions else ''
         r += ('  Naming Contexts:' + linesep + linesep.join(['    ' + s for s in self.naming_contexts]) + linesep) if self.naming_contexts else ''
         r += ('  Alternative Servers:' + linesep + linesep.join(['    ' + s for s in self.alt_servers]) + linesep) if self.alt_servers else ''
         r += ('  Supported Controls:' + linesep + linesep.join(['    ' + str(s) for s in self.supported_controls]) + linesep) if self.supported_controls else ''
@@ -179,7 +181,8 @@ class SchemaInfo(object):
 
         for k, v in self.other.items():
             r += '  ' + k + ': ' + linesep
-            r += (linesep.join(['    ' + str(s) for s in v])) if isinstance(v, (list, tuple)) else v + linesep
+            r += (linesep.join(['    ' + str(s) for s in v])) if isinstance(v, (list, tuple)) else v
+            r += linesep
         return r
 
 
@@ -233,7 +236,7 @@ class BaseObjectInfo(object):
         if not definitions:
             return None
 
-        ret_dict = dict()
+        ret_dict = CaseInsensitiveDict() if CASE_INSENSITIVE_SCHEMA_NAMES else dict()
         for object_definition in definitions:
             if [object_definition[0] == ')' and object_definition[:-1] == ')']:
                 if cls is MatchingRuleInfo:
@@ -334,7 +337,7 @@ class BaseObjectInfo(object):
                         object_def.min_length = None
                 if hasattr(object_def, 'name') and object_def.name:
                     for name in object_def.name:
-                        ret_dict[name.lower()] = object_def
+                        ret_dict[name] = object_def
                 else:
                     ret_dict[object_def.oid] = object_def
             else:

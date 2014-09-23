@@ -1,31 +1,33 @@
 """
-Created on 2014.03.23
-
-@author: Giovanni Cannata
-
-Copyright 2014 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2014.03.23
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
 from datetime import datetime
 from os import linesep
 from threading import Thread, Lock
 from time import sleep
-from .. import REUSABLE_POOL_SIZE, REUSABLE_CONNECTION_LIFETIME, STRATEGY_SYNC_RESTARTABLE, TERMINATE_REUSABLE, RESPONSE_WAITING_TIMEOUT, LDAP_MAX_INT, RESPONSE_SLEEPTIME
+from .. import REUSABLE_THREADED_POOL_SIZE, REUSABLE_THREADED_LIFETIME, STRATEGY_SYNC_RESTARTABLE, TERMINATE_REUSABLE, RESPONSE_WAITING_TIMEOUT, LDAP_MAX_INT, RESPONSE_SLEEPTIME
 from .baseStrategy import BaseStrategy
 from ..core.usage import ConnectionUsage
 from ..core.exceptions import LDAPConnectionPoolNameIsMandatoryError, LDAPConnectionPoolNotStartedError, LDAPOperationResult, LDAPExceptionError
@@ -72,8 +74,8 @@ class ReusableThreadedStrategy(BaseStrategy):
                 self.name = connection.pool_name
                 self.original_connection = connection
                 self.connections = []
-                self.pool_size = connection.pool_size or REUSABLE_POOL_SIZE
-                self.lifetime = connection.pool_lifetime or REUSABLE_CONNECTION_LIFETIME
+                self.pool_size = connection.pool_size or REUSABLE_THREADED_POOL_SIZE
+                self.lifetime = connection.pool_lifetime or REUSABLE_THREADED_LIFETIME
                 self.request_queue = Queue()
                 self.open_pool = False
                 self.bind_pool = False

@@ -1,24 +1,30 @@
 """
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
+
+# Created on 2013.05.15
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2013 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
+
+__version__ = '0.9.5.3'
+__author__ = 'Giovanni Cannata'
 
 # authentication
 AUTH_ANONYMOUS = 0
@@ -51,6 +57,11 @@ ALL_ATTRIBUTES = '*'
 NO_ATTRIBUTES = '1.1'  # as per RFC 4511
 ALL_OPERATIONAL_ATTRIBUTES = '+'  # as per RFC 3673
 
+#checks
+ATTRIBUTES_EXCLUDED_FROM_CHECK = [ALL_ATTRIBUTES, ALL_OPERATIONAL_ATTRIBUTES, NO_ATTRIBUTES, 'ldapSyntaxes', 'matchingRules', 'matchingRuleUse', 'dITContentRules', 'dITStructureRules', 'nameForms']
+CASE_INSENSITIVE_ATTRIBUTE_NAMES = True
+CASE_INSENSITIVE_SCHEMA_NAMES = True
+
 # modify type
 MODIFY_ADD = 0
 MODIFY_DELETE = 1
@@ -77,11 +88,12 @@ SOCKET_SIZE = 4096  # socket byte size
 RESTARTABLE_SLEEPTIME = 2  # time to wait in a restartable strategy before retrying the request
 RESTARTABLE_TRIES = 50  # number of times to retry in a restartable strategy before giving up. Set to True for unlimited retries
 
-# reusable strategy
+# reusable strategies (Threaded)
 TERMINATE_REUSABLE = -1
-REUSABLE_POOL_SIZE = 10
-REUSABLE_CONNECTION_LIFETIME = 3600
-DEFAULT_POOL_NAME = 'connection_pool'
+REUSABLE_THREADED_POOL_SIZE = 10
+REUSABLE_THREADED_LIFETIME = 3600  # 1 hour
+DEFAULT_THREADED_POOL_NAME = 'connection_threaded_pool'
+
 
 # LDAP protocol
 LDAP_MAX_INT = 2147483647
@@ -186,6 +198,7 @@ POOLING_STRATEGY_ROUND_ROBIN = 1
 POOLING_STRATEGY_RANDOM = 2
 POOLING_STRATEGIES = [POOLING_STRATEGY_FIRST, POOLING_STRATEGY_ROUND_ROBIN, POOLING_STRATEGY_RANDOM]
 
+
 # ldap format conversion for syntaxes and attribute types
 FORMAT_UNICODE = ['1.3.6.1.4.1.1466.115.121.1.3',  # Attribute type description
                   '1.3.6.1.4.1.1466.115.121.1.6',  # Bit String
@@ -200,10 +213,10 @@ FORMAT_UNICODE = ['1.3.6.1.4.1.1466.115.121.1.3',  # Attribute type description
                   '1.3.6.1.4.1.1466.115.121.1.25',  # Guide (obsolete)
                   '1.3.6.1.4.1.1466.115.121.1.26',  # IA5 string
                   '1.3.6.1.4.1.1466.115.121.1.30',  # Matching rule description
-                  '1.3.6.1.4.1.1466.115.121.1.31',  # Matching ruledescription
+                  '1.3.6.1.4.1.1466.115.121.1.31',  # Matching rule use description
                   '1.3.6.1.4.1.1466.115.121.1.34',  # Name and optional UID
                   '1.3.6.1.4.1.1466.115.121.1.35',  # Name form description
-                  '1.3.6.1.4.1.1466.115.121.1.36',  # Mumeric string
+                  '1.3.6.1.4.1.1466.115.121.1.36',  # Numeric string
                   '1.3.6.1.4.1.1466.115.121.1.37',  # Object class description
                   '1.3.6.1.4.1.1466.115.121.1.38',  # OID
                   '1.3.6.1.4.1.1466.115.121.1.39',  # Other mailbox
@@ -230,8 +243,7 @@ FORMAT_BOOLEAN = ['1.3.6.1.4.1.1466.115.121.1.7'  # Boolean
                   ]
 FORMAT_TIME = ['1.3.6.1.4.1.1466.115.121.1.24',  # Generalized time
                '1.3.6.1.4.1.1466.115.121.1.53'  # Utc time  (deprecated)
-
-]
+               ]
 
 # centralized imports
 from .core.server import Server

@@ -1,36 +1,35 @@
 """
-Created on 2013.05.31
-
-@author: Giovanni Cannata
-
-Copyright 2013 Giovanni Cannata
-
-This file is part of python3-ldap.
-
-python3-ldap is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-python3-ldap is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with python3-ldap in the COPYING and COPYING.LESSER files.
-If not, see <http://www.gnu.org/licenses/>.
 """
 
-from socket import getaddrinfo, gaierror
+# Created on 2014.05.31
+#
+# Author: Giovanni Cannata
+#
+# Copyright 2014 Giovanni Cannata
+#
+# This file is part of python3-ldap.
+#
+# python3-ldap is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# python3-ldap is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with python3-ldap in the COPYING and COPYING.LESSER files.
+# If not, see <http://www.gnu.org/licenses/>.
 
-from .. import GET_NO_INFO, GET_DSA_INFO, GET_SCHEMA_INFO, GET_ALL_INFO, ALL_ATTRIBUTES, SEARCH_SCOPE_BASE_OBJECT, LDAP_MAX_INT
+import socket
 from threading import Lock
+from .. import GET_NO_INFO, GET_DSA_INFO, GET_SCHEMA_INFO, GET_ALL_INFO, ALL_ATTRIBUTES, SEARCH_SCOPE_BASE_OBJECT, LDAP_MAX_INT
 from .exceptions import LDAPInvalidPort
 from ..core.exceptions import LDAPInvalidServerError
 from ..protocol.rfc4512 import SchemaInfo, DsaInfo
 from .tls import Tls
-import socket
 
 
 class Server(object):
@@ -135,7 +134,7 @@ class Server(object):
         self._schema_info = None
         self.lock = Lock()
         self.custom_formatter = formatter
-        self._address_info = None  # will be resolved at open time (or when you call check_availability)
+        self._address_info = None  # property self.address_info resolved at open time (or when you call check_availability)
 
     @staticmethod
     def _is_ipv6(host):
@@ -161,6 +160,13 @@ class Server(object):
 
         return r
 
+    @property
+    def address_info(self):
+        if not self._address_info:
+            self._address_info = socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM)
+
+        return self._address_info
+
     def check_availability(self):
         """
         Tries to open, connect and close a socket to specified address
@@ -168,11 +174,9 @@ class Server(object):
         """
         available = True
         try:
-            if not self._address_info:
-                self._address_info = socket.getaddrinfo(self.host, self.port, 0, socket.SOCK_STREAM)
-            temp_socket = socket.socket(*self._address_info[0][:3])
+            temp_socket = socket.socket(*self.address_info[0][:3])
             try:
-                temp_socket.connect(self._address_info[0][4])
+                temp_socket.connect(self.address_info[0][4])
             except socket.error:
                 available = False
             finally:
@@ -181,7 +185,7 @@ class Server(object):
                     temp_socket.close()
                 except socket.error:
                     available = False
-        except gaierror:
+        except socket.gaierror:
             available = False
 
         return available
@@ -189,7 +193,7 @@ class Server(object):
     @staticmethod
     def next_message_id():
         """
-        messageId is unique for all connection
+        messageId is unique for all connections
         """
         with Server._message_id_lock:
             Server._message_counter += 1
@@ -231,7 +235,22 @@ class Server(object):
 
         result = None
         if schema_entry:
-            result = connection.search(schema_entry, search_filter='(objectClass=subschema)', search_scope=SEARCH_SCOPE_BASE_OBJECT, attributes=ALL_ATTRIBUTES, get_operational_attributes=True)
+            result = connection.search(schema_entry,
+                                       search_filter='(objectClass=subschema)',
+                                       search_scope=SEARCH_SCOPE_BASE_OBJECT,
+                                       attributes=['objectClasses',  # requests specific subschema attributes
+                                                   'attributeTypes',
+                                                   'ldapSyntaxes',
+                                                   'matchingRules',
+                                                   'matchingRuleUse',
+                                                   'dITContentRules',
+                                                   'dITStructureRules',
+                                                   'nameForms',
+                                                   'createTimestamp',
+                                                   'modifyTimestamp',
+                                                   '*'],  # requests all remaining attributes (other)
+                                       get_operational_attributes=True
+                                       )
 
         with self.lock:
             self._schema_info = None
